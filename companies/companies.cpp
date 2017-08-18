@@ -18,6 +18,7 @@ typedef struct{
 int max(int a, int b){
     return a > b ? a : b;
 }
+
 bool not_in(vector<node> w, int n){
     for (int i = 0; i < w.size(); i++){
         if (w[i].n == n){
@@ -26,6 +27,7 @@ bool not_in(vector<node> w, int n){
     }
     return true;
 }
+
 int main(){
 
     freopen("companies.in", "r", stdin);
@@ -88,7 +90,6 @@ int main(){
     }
 
     for (m = 1; m <= numcomps; m++){//for each node in graph
-        
         //make tree with node m as root
         finished_tree = false;
         tree.clear();
@@ -175,7 +176,7 @@ int main(){
     vector<int> temp;
     for (i = 0; i < final_ans.size() - 1; i++){
         for (j = i; j < final_ans.size(); j++){
-            if (final_ans[i][0] * 1000 + final_ans[i][1]>final_ans[j][0] * 1000 + final_ans[j][1]){
+            if (final_ans[i][0] * 1000 + final_ans[i][1]>final_ans[j][0] * 1000 + final_ans[j][1]){//just multiply first num by 1000 to skip lexicographical check
                 temp = final_ans[i];
                 final_ans[i] = final_ans[j];
                 final_ans[j] = temp;

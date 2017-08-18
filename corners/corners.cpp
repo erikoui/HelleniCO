@@ -1,11 +1,11 @@
 //gets 7/10
 
-#include<stdio.h>
-#include<stdlib.h>
-#include<vector>
-#include<iostream>
-#include<fstream>
-#include<algorithm>
+#include <stdio.h>
+#include <stdlib.h>
+#include <vector>
+#include <iostream>
+#include <fstream>
+#include <algorithm>
 
 #define flag 2
 #define rock 1
