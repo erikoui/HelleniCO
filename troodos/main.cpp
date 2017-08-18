@@ -9,6 +9,9 @@ struct edge{
     int to,weight;
 };
 
+//ok now i know how to use git
+//i think
+
 struct node{
     vector<edge> in,out;
     int incount;
