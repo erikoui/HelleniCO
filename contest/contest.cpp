@@ -1,5 +1,5 @@
-#include<stdio.h>
-#include<stdlib.h>
+#include <stdio.h>
+#include <stdlib.h>
 //         ..............................             .N?                         
 //          .         ..   .         ....  .         MM $M .           .   .     .
 //             MM   MMM.   .           ......    .. MM...M...    ..  ........  . .
@@ -58,78 +58,78 @@
 //         wow
 
 typedef struct road{
-	int from,to,weight;
+    int from,to,weight;
 }road;
 
 typedef struct crossings{
-	int sum,branches;
+    int sum,branches;
 }crossings;
 
 void countBranches(crossings node[],road route[],int numofnodes){
-	int i,j;
-	for(i=0;i<numofnodes;i++){
-		node[i].branches=0;
-		node[i].sum=0;
-	}
-	for(i=0;i<numofnodes;i++){
-		for(j=0;j<numofnodes-1;j++){
-			if(route[j].from==i+1){
-				node[i].branches++;
-			}
-		}
-	}
+    int i,j;
+    for(i=0;i<numofnodes;i++){
+        node[i].branches=0;
+        node[i].sum=0;
+    }
+    for(i=0;i<numofnodes;i++){
+        for(j=0;j<numofnodes-1;j++){
+            if(route[j].from==i+1){
+                node[i].branches++;
+            }
+        }
+    }
 }
 
 void dfs(road route[],crossings node[],int nodenum,int numofnodes){
-	if(node[nodenum].branches==0){
-		for(int j=0;j<numofnodes-1;j++){
-			if(route[j].to==nodenum+1){
-				node[nodenum].sum=route[j].weight+node[route[j].from-1].sum;
-				break;
-			}
-		}
-	}else{
-		for(int j=0;j<numofnodes-1;j++){
-			if(route[j].from==nodenum+1){//find next node
-				for(int k=0;k<numofnodes-1;k++){
-					if(route[k].to==nodenum+1){
-						node[nodenum].sum=route[k].weight+node[route[k].from-1].sum;
-						break;
-					}
-				}
-				dfs(route,node,route[j].to-1,numofnodes);//do the thing again in the next node
-			}
-		}
-	}
+    if(node[nodenum].branches==0){
+        for(int j=0;j<numofnodes-1;j++){
+            if(route[j].to==nodenum+1){
+                node[nodenum].sum=route[j].weight+node[route[j].from-1].sum;
+                break;
+            }
+        }
+    }else{
+        for(int j=0;j<numofnodes-1;j++){
+            if(route[j].from==nodenum+1){//find next node
+                for(int k=0;k<numofnodes-1;k++){
+                    if(route[k].to==nodenum+1){
+                        node[nodenum].sum=route[k].weight+node[route[k].from-1].sum;
+                        break;
+                    }
+                }
+                dfs(route,node,route[j].to-1,numofnodes);//do the thing again in the next node
+            }
+        }
+    }
 }
 
 int main(){
-	FILE* in=fopen("contest.in","r");
-	FILE* out=fopen("contest.out","w");
-	int numofnodes;
-	fscanf(in,"%d",&numofnodes);
+    FILE* in=fopen("contest.in","r");
+    FILE* out=fopen("contest.out","w");
+    int numofnodes;
+    fscanf(in,"%d",&numofnodes);
 
-	int max=0;
-	int i,j;
+    int max=0;
+    int i,j;
 
-	road *route=new road[numofnodes-1];
-	crossings* node=new crossings[numofnodes];
+    road *route=new road[numofnodes-1];
+    crossings* node=new crossings[numofnodes];
 
-	for(i=0;i<numofnodes-1;i++){
-		fscanf(in,"%d%d%d",&route[i].from,&route[i].to,&route[i].weight);
-	}
+    for(i=0;i<numofnodes-1;i++){
+        fscanf(in,"%d%d%d",&route[i].from,&route[i].to,&route[i].weight);
+    }
 
-	countBranches(node,route,numofnodes);
+    countBranches(node,route,numofnodes);
 
-	dfs(route,node,0,numofnodes);
+    dfs(route,node,0,numofnodes);
 
-	for(i=0;i<numofnodes;i++){
-		if(node[i].sum>max){
-			max=node[i].sum;
-		}
-	}
-	fprintf(out,"%d\n",max);
-	fclose(in);
-	fclose(out);
-	return 0;
+    for(i=0;i<numofnodes;i++){
+        if(node[i].sum>max){
+            max=node[i].sum;
+        }
+    }
+    fprintf(out,"%d\n",max);
+    fclose(in);
+    fclose(out);
+    return 0;
 }
