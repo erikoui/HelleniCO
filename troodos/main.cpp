@@ -9,9 +9,6 @@ struct edge{
     int to,weight;
 };
 
-//ok now i know how to use git
-//i think
-
 struct node{
     vector<edge> in,out;
     int incount;
@@ -85,6 +82,10 @@ int main(int argc, char **argv)
     }
     
     topologicalSort(graph,0,tpsortedgraph);
+ 
+    //sub1 is get max distance from 0 to n-1
+    //sub2 is get sum of max(0 to i)-min(0 to i) for i=0 to n-1
+    //sub3 is something weird which i have not thought about yet
  
     fin.close();
     fout.close();
