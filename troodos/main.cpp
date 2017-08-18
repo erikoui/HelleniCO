@@ -9,8 +9,6 @@ struct edge{
     int to,weight;
 };
 
-//test add
-
 struct node{
     vector<edge> in,out;
     int incount;
