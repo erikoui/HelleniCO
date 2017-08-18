@@ -1,2 +1,2 @@
 # HelleniCO
-My olutions to HelleniCO.gr peoblems
+My solutions to HelleniCO.gr problems
