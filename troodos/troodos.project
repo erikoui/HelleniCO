@@ -93,8 +93,8 @@
     </Configuration>
   </Settings>
   <VirtualDirectory Name="src">
-    <File Name="main.cpp"/>
     <File Name="Debug/troodos.in"/>
     <File Name="Debug/troodos.out"/>
+    <File Name="troodos.cpp"/>
   </VirtualDirectory>
 </CodeLite_Project>

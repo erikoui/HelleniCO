@@ -49,9 +49,10 @@ int main(int argc, char **argv)
 	ofstream fout("troodos.out");
     
     uint32_t num_nodes,num_edges;
-    uint32_t i;
+    uint32_t i,j;
     uint32_t input_from,input_to,input_weight;
     uint32_t output_sub1,output_sub2,output_sub3;//max distance, sum(max-min)for each node, 3rd subproblem
+    uint32_t maxdist_to_current=0;
     
     edge edge_buffer;
     vector<node> graph,tpsortedgraph;
@@ -81,9 +82,26 @@ int main(int argc, char **argv)
         graph[input_to].incount++;
     }
     
+    //O(n) topological sort
     topologicalSort(graph,0,tpsortedgraph);
  
-    //TODO: sub1 is get max distance from 0 to n-1
+    //find max distance from 0 to n-1
+    for(i=1;i<tpsortedgraph.size();i++){//for all nodes in topological order
+        //current maxdist is max(in[j].maxdist+weight)
+        int index_of_current=tpsortedgraph[i].index;
+        maxdist_to_current=0;
+        for(j=0;j<graph[index_of_current].in.size();j++){//for all nodes that lead to node i
+            int index_of_previous=graph[index_of_current].in[j].to;
+            int maxdist_of_previous=graph[index_of_previous].maxdist;
+            int weight_of_j_to_i= graph[index_of_current].in[j].weight;
+            if(weight_of_j_to_i+maxdist_of_previous>maxdist_to_current){
+                maxdist_to_current=weight_of_j_to_i+maxdist_of_previous;
+            }
+        }
+        graph[tpsortedgraph[i].index].maxdist=maxdist_to_current;
+    }
+    output_sub1=graph[graph.size()-1].maxdist;//save answer to subproblem 1
+        
     //TODO: sub2 is get sum of max(0 to i)-min(0 to i) for i=0 to n-1
     //TODO: sub3 is something weird which i have not thought about yet
  
