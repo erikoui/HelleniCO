@@ -10,33 +10,33 @@ struct edge {
 };
 
 struct node {
-    vector<edge> in, out;
-    int incount;
-    int maxdist, mindist;
-    int index;
-    int maxpathpred;
+    vector<edge> in, out;//saves the edges conimg into my node and going out of my node
+    int incount;//basically in.size() but will be changed later to simulate incoming edges being deleted
+    int maxdist, mindist;//max and min distance to this node (from node 0)
+    int index;//the name of the node (used by tpsortedgraph to know the node's index after it has been sorted)
+    int maxpathpred;//index of predecessor in max length path.
     bool visited;
 };
 
 void topologicalSort (vector<node>& graph, uint32_t current_node, vector<node>& tpsortedgraph)
 {
     uint32_t j;
+    
     //save the curent node into the topologically sorted graph
     tpsortedgraph.push_back (graph[current_node]);
     graph[current_node].visited = true;
 
-    //exit starement
+    //exit statement
     if (current_node == graph.size() - 1) {
         return;
     }
 
-    //recursion
     //simulates the deletion of graph[current_node] by subtracting 1 from the (in counter) of the nodes it is connected to.
-    //the recurs for each of those nodes whose incount has been changed to 0.
     for (j = 0; j < graph[current_node].out.size(); j++) {
         --graph[graph[current_node].out[j].to].incount;
-        //topologicalSort(graph,graph[current_node].out[j].to,tpsortedgraph);
     }
+    
+    //recur for each of those nodes whose incount has been changed to 0.
     for (j = 0; j < graph.size(); j++) {
         if (graph[j].incount == 0) {
             if (!graph[j].visited)
@@ -85,10 +85,10 @@ int main (int argc, char **argv)
         graph[input_to].incount++;
     }
 
-    //O(n) topological sort
     topologicalSort (graph, 0, tpsortedgraph);
 
-    //find max distance from 0 to n-1
+    //find max distance from 0 to all nodes
+    //this is probably bad and inefficient
     for (i = 1; i < tpsortedgraph.size(); i++) { //for all nodes in topological order
         //current maxdist is max(in[j].maxdist+weight)
         index_of_current = tpsortedgraph[i].index;
@@ -107,6 +107,7 @@ int main (int argc, char **argv)
     }
     output_sub1 = graph[graph.size() - 1].maxdist; //save answer to subproblem 1
 
+    
     //find min distance to next node by using maxdist as min distance of previous node
     for (i = 1; i < tpsortedgraph.size(); i++) { //for all nodes in topological order
         //current mindist is max(in[j].mindist+weight)
@@ -128,7 +129,6 @@ int main (int argc, char **argv)
     }
 
     //sub3 is num of nodes - num of nodes in longest path
-
     //count num of nodes in longest path
     output_sub3 = 1;
     i = graph.size() - 1;
