@@ -6,14 +6,14 @@
 ProjectName            :=tennis
 ConfigurationName      :=Debug
 WorkspacePath          :=/home/erik/Documents/hellenico
-ProjectPath            :=/home/erik/Documents/hellenico/tennis
+ProjectPath            :=/home/erik/Documents/hellenico/HelleniCO/tennis
 IntermediateDirectory  :=./Debug
 OutDir                 := $(IntermediateDirectory)
 CurrentFileName        :=
 CurrentFilePath        :=
 CurrentFileFullPath    :=
 User                   :=Erik
-Date                   :=08/15/17
+Date                   :=08/19/17
 CodeLitePath           :=/home/erik/.codelite
 LinkerName             :=/usr/bin/g++
 SharedObjectLinkerName :=/usr/bin/g++ -shared -fPIC
@@ -92,7 +92,7 @@ PreBuild:
 ## Objects
 ##
 $(IntermediateDirectory)/main.cpp$(ObjectSuffix): main.cpp $(IntermediateDirectory)/main.cpp$(DependSuffix)
-	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/erik/Documents/hellenico/tennis/main.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/main.cpp$(ObjectSuffix) $(IncludePath)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/erik/Documents/hellenico/HelleniCO/tennis/main.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/main.cpp$(ObjectSuffix) $(IncludePath)
 $(IntermediateDirectory)/main.cpp$(DependSuffix): main.cpp
 	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/main.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/main.cpp$(DependSuffix) -MM main.cpp
 
@@ -100,7 +100,7 @@ $(IntermediateDirectory)/main.cpp$(PreprocessSuffix): main.cpp
 	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/main.cpp$(PreprocessSuffix) main.cpp
 
 $(IntermediateDirectory)/gen.cpp$(ObjectSuffix): gen.cpp $(IntermediateDirectory)/gen.cpp$(DependSuffix)
-	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/erik/Documents/hellenico/tennis/gen.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/gen.cpp$(ObjectSuffix) $(IncludePath)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/erik/Documents/hellenico/HelleniCO/tennis/gen.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/gen.cpp$(ObjectSuffix) $(IncludePath)
 $(IntermediateDirectory)/gen.cpp$(DependSuffix): gen.cpp
 	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/gen.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/gen.cpp$(DependSuffix) -MM gen.cpp
 
