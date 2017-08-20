@@ -1,3 +1,8 @@
+//solves hellenico corners problem by brute force.
+//hopefully will need max 2^20 iterations
+//uses a 2d vector containing the possible moves from each position
+//when something moves it changes the possible moves around it because things can jump over it now
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <vector>
