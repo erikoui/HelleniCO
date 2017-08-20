@@ -38,6 +38,8 @@ struct square {
 //                                           FTTTTT
 //                                            ....
 
+//TODO: BFS brute force
+
 void readBoard(ifstream& inf, vector<vector<square> >& board){
     int i,j,k;
     char x;
