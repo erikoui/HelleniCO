@@ -38,7 +38,6 @@ struct square {
 //                                           FTTTTT
 //                                            ....
 
-//TODO: DFS brute force
 int mind;
 
 bool cmpCoord(coord c,coord d){
@@ -80,8 +79,9 @@ bool done(vector<coord> poulpos){
     }
 }
 
-void dfs(vector<vector<square> > b, vector<coord> poulpos, int dist,vector<vector<bool> > visited) {
+void dfs(vector<vector<square> > b, vector<coord> poulpos, int dist,vector<vector<vector<bool> > > visited) {
     if(done(poulpos)) {
+        cout<<"found one end:"<<dist<<endl;
         if(dist < mind) {
             mind = dist;
         }
@@ -89,49 +89,50 @@ void dfs(vector<vector<square> > b, vector<coord> poulpos, int dist,vector<vecto
     int j;
     //TODO: mark nodes which im going to as visited
     for(j = 0; j < 4; j++) { //each poul
-        if(b[poulpos[j].i][poulpos[j].j].cangoto[up1]) { //if current poul can go to direction
+        visited[poulpos[j].i+2][poulpos[j].j+2][j]=true;
+        if((!visited[poulpos[j].i-1+2][poulpos[j].j+2][j])&&(b[poulpos[j].i][poulpos[j].j].cangoto[up1])) { //if current poul can go to direction
             //move it to direction
             poulpos[j].i-=1;
             dfs(b,poulpos,dist+1,visited);
             poulpos[j].i+=1;
         }
-        if(b[poulpos[j].i][poulpos[j].j].cangoto[up2]) { //if current poul can go to direction
+        if((!visited[poulpos[j].i-2+2][poulpos[j].j+2][j])&&(b[poulpos[j].i][poulpos[j].j].cangoto[up2]) ){ //if current poul can go to direction
             //move it to direction
             poulpos[j].i-=2;
             dfs(b,poulpos,dist+1,visited);
             poulpos[j].i+=2;
         }
-        if(b[poulpos[j].i][poulpos[j].j].cangoto[down1]) { //if current poul can go to direction
+        if((!visited[poulpos[j].i+1+2][poulpos[j].j+2][j])&&(b[poulpos[j].i][poulpos[j].j].cangoto[down1])) { //if current poul can go to direction
             //move it to direction
             poulpos[j].i+=1;
             dfs(b,poulpos,dist+1,visited);
             poulpos[j].i-=1;
         }
-        if(b[poulpos[j].i][poulpos[j].j].cangoto[down2]) { //if current poul can go to direction
+        if((!visited[poulpos[j].i+2+2][poulpos[j].j+2][j])&&(b[poulpos[j].i][poulpos[j].j].cangoto[down2]) ){ //if current poul can go to direction
             //move it to direction
             poulpos[j].i+=2;
             dfs(b,poulpos,dist+1,visited);
             poulpos[j].i-=2;
         }
-        if(b[poulpos[j].i][poulpos[j].j].cangoto[left1]) { //if current poul can go to direction
+        if((!visited[poulpos[j].i+2][poulpos[j].j-1+2][j])&&(b[poulpos[j].i][poulpos[j].j].cangoto[left1]) ){ //if current poul can go to direction
             //move it to direction
             poulpos[j].j-=1;
             dfs(b,poulpos,dist+1,visited);
             poulpos[j].j+=1;
         }
-        if(b[poulpos[j].i][poulpos[j].j].cangoto[left2]) { //if current poul can go to direction
+        if((!visited[poulpos[j].i+2][poulpos[j].j-2+2][j])&&(b[poulpos[j].i][poulpos[j].j].cangoto[left2]) ){ //if current poul can go to direction
             //move it to direction
             poulpos[j].j-=2;
             dfs(b,poulpos,dist+1,visited);
             poulpos[j].j+=2;
         }
-        if(b[poulpos[j].i][poulpos[j].j].cangoto[right1]) { //if current poul can go to direction
+        if((!visited[poulpos[j].i+2][poulpos[j].j+1+2][j])&&(b[poulpos[j].i][poulpos[j].j].cangoto[right1])) { //if current poul can go to direction
             //move it to direction
             poulpos[j].j+=1;
             dfs(b,poulpos,dist+1,visited);
             poulpos[j].j-=1;
         }
-        if(b[poulpos[j].i][poulpos[j].j].cangoto[right2]) { //if current poul can go to direction
+        if((!visited[poulpos[j].i+2][poulpos[j].j+2+2][j])&&(b[poulpos[j].i][poulpos[j].j].cangoto[right2])) { //if current poul can go to direction
             //move it to direction
             poulpos[j].j+=2;
             dfs(b,poulpos,dist+1,visited);
@@ -300,16 +301,21 @@ int main() {
     ifstream inf("corners.in");
     ofstream ouf("corners.out");
 
-    int i;
+    int i,j;
     vector<vector<square> > board;
     vector<coord> pp;
-    vector<vector<bool> > visited;
+    vector<vector<vector<bool> > > visited;
     
     board.resize(6);
-    visited.resize(6);
-    for(i = 0; i < 6; i++) {
-        visited[i].resize(6);
-        board[i].resize(6);
+    visited.resize(10);//pad 2
+    for(i = 0; i < 10; i++) {
+        visited[i].resize(10);
+        if(i<6){
+            board[i].resize(6);
+        }
+        for(j=0;j<10;j++){
+            visited[i][j].resize(4);
+        }
     }
 
     readBoard(inf, board);
@@ -318,10 +324,10 @@ int main() {
     
     //setup for dfs
     mind=9999;
-    visited[4][4]=true;
-    visited[4][5]=true;
-    visited[5][5]=true;
-    visited[5][4]=true;
+    visited[6][6][0]=true;
+    visited[6][7][1]=true;
+    visited[7][7][2]=true;
+    visited[7][6][3]=true;
     doPP(pp);//initialise polpos vector to bottom right corner
     
     dfs(board,pp,0,visited);
