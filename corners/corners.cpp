@@ -1,7 +1,5 @@
-//solves hellenico corners problem by brute force.
-//hopefully will need max 2^20 iterations
-//uses a 2d vector containing the possible moves from each position
-//when something moves it changes the possible moves around it because things can jump over it now
+//solves hellenico corners problem by modified flood fill
+//floods for each poul cyclically instead of assuming that 2 moves are always possible
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,332 +7,297 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include <queue>
 
 #define flag 2
 #define rock 1
 #define empty 0
 
-#define up1 0
-#define up2 1
-#define down1 2
-#define down2 3
-#define left1 4
-#define left2 5
-#define right1 6
-#define right2 7
-
 using namespace std;
 
-typedef struct {        
+typedef struct {
     int i, j;
 } coord;
 
-struct square {
-    bool cangoto[8];
-};
+void flood(coord p, coord f, vector<vector<int> >& b, vector<vector<vector<int> > >& d, int l) { //position(to/current),from,board,distances,level
+    //check oob
 
-//TODO: function that prints the board (e.g. TTFFTF)
-//                                           TTFTFT
-//                                           FTTTTT
-//                                            ....
-
-int mind;
-
-bool cmpCoord(coord c,coord d){
-    if(c.i<d.i){
-        return true;
+    if(p.i > 5) {
+        return;
     }
-    if(c.i==d.i){
-        if(c.j<d.j){
-            return true;
-        }
+    if(p.j > 5) {
+        return;
+    }
+    if(p.i < 0) {
+        return;
+    }
+    if(p.j < 0) {
+        return;
+    }
+
+    if((p.i == f.i + 2) && (b[f.i + 1][f.j] == flag))
+        return;
+    if((p.i == f.i - 2) && (b[f.i - 1][f.j] == flag))
+        return;
+    if((p.j == f.j + 2) && (b[f.i][f.j + 1] == flag))
+        return;
+    if((p.j == f.j - 2) && (b[f.i][f.j - 1] == flag))
+        return;
+    //current cell is where im goin, neds to be empty
+    if(b[p.i][p.j] != 0) {
+        return;
+    }
+
+    //  ouf << f.i << "," << f.j << "(" << d[f.i][f.j][l] << ") -> " << p.i << ", " << p.j << "(" << d[p.i][p.j][l]<<endl;
+    if((d[f.i][f.j][l] + 1) < d[p.i][p.j][l]) {
+        d[p.i][p.j][l] = d[f.i][f.j][l] + 1;
+
+
+        coord n;//next
+        n.j = p.j;
+        n.i = p.i + 1;
+        flood(n, p, b, d, l);
+        n.i = p.i + 2;
+        flood(n, p, b, d, l);
+        n.i = p.i - 1;
+        flood(n, p, b, d, l);
+        n.i = p.i - 2;
+        flood(n, p, b, d, l);
+        n.i = p.i;
+        n.j = p.j + 1;
+        flood(n, p, b, d, l);
+        n.j = p.j + 2;
+        flood(n, p, b, d, l);
+        n.j = p.j - 1;
+        flood(n, p, b, d, l);
+        n.j = p.j - 2;
+        flood(n, p, b, d, l);
+    }
+
+}
+
+bool setav(vector<vector<vector<int> > >& d, int i, int j, int level, int amount) {
+    //checks if its ok to set a new dist to d[i][j][level] and does so
+
+    if(i > 5) {
+        return false;
+    }
+    if(j > 5) {
+        return false;
+    }
+    if(i < 0) {
+        return false;
+    }
+    if(j < 0) {
+        return false;
+    }
+    if(d[i][j][level] > amount) {
+        d[i][j][level] = amount;
+        return true;
     }
     return false;
 }
 
-bool operator==(const coord& a, const coord& b){
-    return (a.i==b.i)&&(a.j==b.j);
-}
-
-bool done(vector<coord> poulpos){
-    sort(poulpos.begin(),poulpos.end(),cmpCoord);
-    coord zz,zo,oz,oo;
-    
-    zz.i=0;
-    zz.j=0;
-    
-    zo.i=0;
-    zo.j=1;
-    
-    oz.i=1;
-    oz.j=0;
-    
-    oo.i=1;
-    oo.j=1;
-    
-    if((poulpos[0]==zz)&&(poulpos[1]==zo)&&(poulpos[2]==oz)&&(poulpos[3]==oo)){
-        return true;
-    }else{
-        return false;
+void floodFill(vector<vector<int> >& b, vector<vector<vector<int> > >& d, vector<vector<bool> > visited, int i, int j, int l) { //position(to/current),from,board,distances,level
+    //check oob
+    if(i > 5) {
+        return;
     }
-}
-
-void dfs(vector<vector<square> > b, vector<coord> poulpos, int dist,vector<vector<vector<bool> > > visited) {
-    if(done(poulpos)) {
-        cout<<"found one end:"<<dist<<endl;
-        if(dist < mind) {
-            mind = dist;
-        }
+    if(j > 5) {
+        return;
     }
-    int j;
-    //TODO: mark nodes which im going to as visited
-    for(j = 0; j < 4; j++) { //each poul
-        visited[poulpos[j].i+2][poulpos[j].j+2][j]=true;
-        if((!visited[poulpos[j].i-1+2][poulpos[j].j+2][j])&&(b[poulpos[j].i][poulpos[j].j].cangoto[up1])) { //if current poul can go to direction
-            //move it to direction
-            poulpos[j].i-=1;
-            dfs(b,poulpos,dist+1,visited);
-            poulpos[j].i+=1;
-        }
-        if((!visited[poulpos[j].i-2+2][poulpos[j].j+2][j])&&(b[poulpos[j].i][poulpos[j].j].cangoto[up2]) ){ //if current poul can go to direction
-            //move it to direction
-            poulpos[j].i-=2;
-            dfs(b,poulpos,dist+1,visited);
-            poulpos[j].i+=2;
-        }
-        if((!visited[poulpos[j].i+1+2][poulpos[j].j+2][j])&&(b[poulpos[j].i][poulpos[j].j].cangoto[down1])) { //if current poul can go to direction
-            //move it to direction
-            poulpos[j].i+=1;
-            dfs(b,poulpos,dist+1,visited);
-            poulpos[j].i-=1;
-        }
-        if((!visited[poulpos[j].i+2+2][poulpos[j].j+2][j])&&(b[poulpos[j].i][poulpos[j].j].cangoto[down2]) ){ //if current poul can go to direction
-            //move it to direction
-            poulpos[j].i+=2;
-            dfs(b,poulpos,dist+1,visited);
-            poulpos[j].i-=2;
-        }
-        if((!visited[poulpos[j].i+2][poulpos[j].j-1+2][j])&&(b[poulpos[j].i][poulpos[j].j].cangoto[left1]) ){ //if current poul can go to direction
-            //move it to direction
-            poulpos[j].j-=1;
-            dfs(b,poulpos,dist+1,visited);
-            poulpos[j].j+=1;
-        }
-        if((!visited[poulpos[j].i+2][poulpos[j].j-2+2][j])&&(b[poulpos[j].i][poulpos[j].j].cangoto[left2]) ){ //if current poul can go to direction
-            //move it to direction
-            poulpos[j].j-=2;
-            dfs(b,poulpos,dist+1,visited);
-            poulpos[j].j+=2;
-        }
-        if((!visited[poulpos[j].i+2][poulpos[j].j+1+2][j])&&(b[poulpos[j].i][poulpos[j].j].cangoto[right1])) { //if current poul can go to direction
-            //move it to direction
-            poulpos[j].j+=1;
-            dfs(b,poulpos,dist+1,visited);
-            poulpos[j].j-=1;
-        }
-        if((!visited[poulpos[j].i+2][poulpos[j].j+2+2][j])&&(b[poulpos[j].i][poulpos[j].j].cangoto[right2])) { //if current poul can go to direction
-            //move it to direction
-            poulpos[j].j+=2;
-            dfs(b,poulpos,dist+1,visited);
-            poulpos[j].j-=2;
-        }
+    if(i < 0) {
+        return;
     }
-}
+    if(j < 0) {
+        return;
+    }
 
-void readBoard(ifstream& inf, vector<vector<square> >& board) {
-    int i, j, k;
-    char x;
-    //read the board from stdin
-    //+ is right/down
-    for(i = 0; i < 6; i++) {
-        for(j = 0; j < 6; j++) {
-            for(k = 0; k < 8; k++) {
-                board[i][j].cangoto[k] = true;
+    queue<coord> Q;
+    coord tc;
+    if(i > 0) {
+        if(b[i - 1][j] == empty) { //up1
+            if(setav(d, i - 1, j, l, d[i][j][l] + 1)) {
+                visited[i - 1][j] = true;
+                tc.i = i - 1;
+                tc.j = j;
+                Q.push(tc);
             }
         }
     }
 
-    for(i = 0; i < 6; i++) {
-        for(j = 0; j < 6; j++) {
-            inf >> x;
-            if(x == 's') { //stone
-                if(j < 5) {
-                    board[i][j + 1].cangoto[left1] = false;
-                    board[i][j + 1].cangoto[left2] = true;
-                    if(j < 4) {
-                        board[i][j + 2].cangoto[left2] = false;
-                    }
-                }
-                if(j > 0) {
-                    board[i][j - 1].cangoto[right1] = false;
-                    board[i][j - 1].cangoto[right2] = true;
-                    if(j > 1) {
-                        board[i][j - 2].cangoto[right2] = false;
-                    }
-                }
+    if(i > 1) {
+        if((b[i - 2][j] == empty) && ((b[i - 1][j] == rock) || (visited[i][j]))) { //up2
+            if(setav(d, i - 2, j, l, d[i][j][l] + 1)) {
+                visited[i - 2][j] = true;
+                tc.i = i - 2;
+                tc.j = j;
+                Q.push(tc);
+            }
+        }
+    }
 
-                if(i < 5) {
-                    board[i + 1][j].cangoto[up1] = false;
-                    board[i + 1][j].cangoto[up2] = true;
-                    if(i < 4) {
-                        board[i + 2][j].cangoto[up2] = false;
-                    }
-                }
-                if(i > 0) {
-                    board[i - 1][j].cangoto[down1] = false;
-                    board[i - 1][j].cangoto[down2] = true;
-                    if(i > 1) {
-                        board[i - 2][j].cangoto[down2] = false;
-                    }
+    if(i < 5) {
+        if(b[i + 1][j] == empty) { //down1
+            if(setav(d, i + 1, j, l, d[i][j][l] + 1)) {
+                visited[i + 1][j] = true;
+                tc.i = i + 1;
+                tc.j = j;
+                Q.push(tc);
+            }
+        }
+    }
+
+    if(i < 4) {
+        if((b[i + 2][j] == empty) && ((b[i + 1][j] == rock) || (visited[i][j]))) { //down2
+            if(setav(d, i + 2, j, l, d[i][j][l] + 1)) {
+                visited[i + 2][j] = true;
+                tc.i = i + 2;
+                tc.j = j;
+                Q.push(tc);
+            }
+        }
+    }
+
+    if(j > 0) {
+        if(b[i][j - 1] == empty) { //left1
+            if(setav(d, i, j - 1, l, d[i][j][l] + 1)) {
+                visited[i][j - 1] = true;
+                tc.i = i;
+                tc.j = j - 1;
+                Q.push(tc);
+            }
+        }
+    }
+
+    if(j > 1) {
+        if((b[i][j - 2] == empty) && ((b[i][j - 2] == rock) || (visited[i][j]))) { //left2
+            if(setav(d, i, j - 2, l, d[i][j][l] + 1)) {
+                visited[i][j - 2] = true;
+                tc.i = i;
+                tc.j = j - 2;
+                Q.push(tc);
+            }
+        }
+    }
+
+    if(j < 5) {
+        if(b[i][j + 1] == empty) { //right1
+            if(setav(d, i, j + 1, l, d[i][j][l] + 1)) {
+                visited[i][j + 1] = true;
+                tc.i = i;
+                tc.j = j + 1;
+                Q.push(tc);
+            }
+        }
+    }
+    
+    if(j < 4) {
+        if((b[i][j + 2] == empty) && ((b[i][j + 2] == rock) || (visited[i][j]))) { //right2
+            if(setav(d, i, j + 2, l, d[i][j][l] + 1)) {
+                visited[i][j + 2] = true;
+                tc.i = i;
+                tc.j = j + 2;
+                Q.push(tc);
+            }
+        }
+    }
+    int x, y, lev;
+    if(Q.size()!=0){
+    for(x = 0; x < 6; x++) {
+        for(y = 0; y < 6; y++) {
+            for(lev = 0; lev < 4; lev++) {
+                if(d[x][y][(l + 1) % 4] != 1337) {
+                    floodFill(b, d, visited, x, y, (l + 1) % 4);
                 }
             }
         }
     }
-    inf.clear();
-    inf.seekg(0);
-
-    for(i = 0; i < 6; i++) {
-        for(j = 0; j < 6; j++) {
-            inf >> x;
-            if(x == 'r') {
-                if(j < 5) {
-                    board[i][j + 1].cangoto[left1] = false;
-                    board[i][j + 1].cangoto[left2] = false;
-                    if(j < 4) {
-                        board[i][j + 2].cangoto[left2] = false;
-                    }
-                }
-                if(j > 0) {
-                    board[i][j - 1].cangoto[right1] = false;
-                    board[i][j - 1].cangoto[right2] = false;
-                    if(j > 1) {
-                        board[i][j - 2].cangoto[right2] = false;
-                    }
-                }
-
-                if(i < 5) {
-                    board[i + 1][j].cangoto[up1] = false;
-                    board[i + 1][j].cangoto[up2] = false;
-                    if(i < 4) {
-                        board[i + 2][j].cangoto[up2] = false;
-                    }
-                }
-                if(i > 0) {
-                    board[i - 1][j].cangoto[down1] = false;
-                    board[i - 1][j].cangoto[down2] = false;
-                    if(i > 1) {
-                        board[i - 2][j].cangoto[down2] = false;
-                    }
-                }
-                break;
-            }
-        }
+    
     }
 }
 
-void doPP(vector<coord>& pp){
-    pp.resize(4);
-    coord temp;
-    temp.i=5;
-    temp.j=5;
-    pp[0]=temp;
-    temp.i=4;
-    temp.j=4;
-    pp[1]=temp;
-    temp.i=4;
-    temp.j=5;
-    pp[2]=temp;
-    temp.i=5;
-    temp.j=4;
-    pp[3]=temp;
-}
-
-void setEdgeBounds(vector<vector<square> >& b){
-    int i;
-    for(i=0;i<6;i++){
-        b[i][0].cangoto[left1]=false;
-        b[i][0].cangoto[left2]=false;
-        b[i][1].cangoto[left2]=false;
-        
-        b[i][5].cangoto[right1]=false;
-        b[i][5].cangoto[right2]=false;
-        b[i][4].cangoto[right2]=false;
-        
-        b[0][i].cangoto[up1]=false;
-        b[0][i].cangoto[up2]=false;
-        b[1][i].cangoto[up2]=false;
-        
-        b[5][i].cangoto[down1]=false;
-        b[5][i].cangoto[down2]=false;
-        b[4][i].cangoto[down2]=false;
-    }
-}
-
-void setInitialGoTo(vector<vector<square> >& b){
-    //i is dowm
-    //j is right
-    b[4][3].cangoto[right1]=false;
-    b[4][3].cangoto[right2]=false;
-    b[4][2].cangoto[right2]=false;
-    b[5][3].cangoto[right1]=false;
-    b[5][3].cangoto[right2]=false;
-    b[5][2].cangoto[right2]=false;
-    b[4][4].cangoto[right1]=false;
-    b[5][4].cangoto[right1]=false;
-    
-    b[4][5].cangoto[left1]=false;
-    b[5][5].cangoto[left1]=false;
-    
-    b[3][4].cangoto[down1]=false;
-    b[3][4].cangoto[down2]=false;
-    b[2][4].cangoto[down2]=false;
-    b[3][5].cangoto[down1]=false;
-    b[3][5].cangoto[down2]=false;
-    b[2][4].cangoto[down2]=false;
-    b[4][4].cangoto[down1]=false;
-    b[4][5].cangoto[down1]=false;
-    
-    b[5][4].cangoto[up1]=false;
-    b[5][5].cangoto[up1]=false;
-}
 int main() {
     ifstream inf("corners.in");
     ofstream ouf("corners.out");
+    int i, j, k, l;
+    int initval = 1337;
+    char x;
+    int times;
 
-    int i,j;
-    vector<vector<square> > board;
-    vector<coord> pp;
-    vector<vector<vector<bool> > > visited;
-    
+    vector<vector<int> > board;
+    vector<vector<bool> > visited;
+    vector<vector<vector<int> > > dist;
+    dist.resize(6);
     board.resize(6);
-    visited.resize(10);//pad 2
-    for(i = 0; i < 10; i++) {
-        visited[i].resize(10);
-        if(i<6){
-            board[i].resize(6);
+    visited.resize(6);
+    for(i = 0; i < 6; i++) {
+        dist[i].resize(6);
+        visited[i].resize(6);
+        board[i].resize(6);
+        for(j = 0; j < 6; j++) {
+            dist[i][j].resize(4);
         }
-        for(j=0;j<10;j++){
-            visited[i][j].resize(4);
+    }
+    //read the board from stdin
+    for(i = 0; i < 6; i++) {
+        for(j = 0; j < 6; j++) {
+            inf >> x;
+            dist[i][j][1] = initval;
+            dist[i][j][2] = initval;
+            dist[i][j][3] = initval;
+            dist[i][j][0] = initval;
+            switch(x) {
+            case '.':
+                board[i][j] = empty;
+                break;
+            case 'r':
+                board[i][j] = flag;
+                break;
+            case 's':
+                board[i][j] = rock;
+                break;
+            default:
+                exit(1337);
+            }
         }
     }
 
-    readBoard(inf, board);
-    setEdgeBounds(board);//sets (e.g.) cangoto[left] of [0][0] to false because there is boundary
-    setInitialGoTo(board);//sets going to squares where the pouls are to false
-    
-    //setup for dfs
-    mind=9999;
-    visited[6][6][0]=true;
-    visited[6][7][1]=true;
-    visited[7][7][2]=true;
-    visited[7][6][3]=true;
-    doPP(pp);//initialise polpos vector to bottom right corner
-    
-    dfs(board,pp,0,visited);
-    
-    ouf<<mind<<endl;
-    
-    inf.close();
-    ouf.close();
+    dist[5][5][0] = 0;//init L1
+    dist[5][4][1] = 0;
+    dist[4][5][2] = 0;
+    dist[4][4][3] = 0;
+    visited[5][5] = true;
+    visited[5][4] = true;
+    visited[4][5] = true;
+    visited[4][4] = true;
+
+    floodFill(board, dist, visited, 4, 4, 3);
+
+
+    vector<int> order;
+    order.push_back(0);
+    order.push_back(1);
+    order.push_back(2);
+    order.push_back(3);
+
+    int minsum = 5000;
+    int sum = 0;
+    coord c[4];
+    for(i = 0; i < 24; i++) {
+        sum = 0;
+        sum += dist[0][0][order[0]] - 1;
+        sum += dist[1][0][order[1]] - 1;
+        sum += dist[0][1][order[2]] - 1;
+        sum += dist[1][1][order[3]] - 1;
+        if(sum < minsum) {
+            minsum = sum;
+        }
+        next_permutation(order.begin(), order.end());
+    }
+    if(minsum > 199) {
+        minsum = -1;
+    }
+    ouf << minsum << endl;
     return 0;
 }
