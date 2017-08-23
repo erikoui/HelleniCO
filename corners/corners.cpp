@@ -98,7 +98,7 @@ bool setav(vector<vector<vector<int> > >& d, int i, int j, int level, int amount
     return false;
 }
 
-void floodFill(vector<vector<int> >& b, vector<vector<vector<int> > >& d, vector<vector<bool> > visited, int i, int j, int l) { //position(to/current),from,board,distances,level
+void floodFill(vector<vector<int> >& b, vector<vector<vector<int> > >& d, vector<vector<bool> > visited_or, int i, int j, int l) { //position(to/current),from,board,distances,level
     //check oob
     if(i > 5) {
         return;
@@ -112,7 +112,8 @@ void floodFill(vector<vector<int> >& b, vector<vector<vector<int> > >& d, vector
     if(j < 0) {
         return;
     }
-
+    
+    vector<vector<bool> > visited=visited_or;
     queue<coord> Q;
     coord tc;
     if(i > 0) {
@@ -127,7 +128,7 @@ void floodFill(vector<vector<int> >& b, vector<vector<vector<int> > >& d, vector
     }
 
     if(i > 1) {
-        if((b[i - 2][j] == empty) && ((b[i - 1][j] == rock) || (visited[i][j]))) { //up2
+        if((b[i - 2][j] == empty) && ((b[i - 1][j] == rock) || (visited_or[i-1][j]))) { //up2
             if(setav(d, i - 2, j, l, d[i][j][l] + 1)) {
                 visited[i - 2][j] = true;
                 tc.i = i - 2;
@@ -149,7 +150,7 @@ void floodFill(vector<vector<int> >& b, vector<vector<vector<int> > >& d, vector
     }
 
     if(i < 4) {
-        if((b[i + 2][j] == empty) && ((b[i + 1][j] == rock) || (visited[i][j]))) { //down2
+        if((b[i + 2][j] == empty) && ((b[i + 1][j] == rock) || (visited_or[i+1][j]))) { //down2
             if(setav(d, i + 2, j, l, d[i][j][l] + 1)) {
                 visited[i + 2][j] = true;
                 tc.i = i + 2;
@@ -171,7 +172,7 @@ void floodFill(vector<vector<int> >& b, vector<vector<vector<int> > >& d, vector
     }
 
     if(j > 1) {
-        if((b[i][j - 2] == empty) && ((b[i][j - 2] == rock) || (visited[i][j]))) { //left2
+        if((b[i][j - 2] == empty) && ((b[i][j - 2] == rock) || (visited_or[i][j-1]))) { //left2
             if(setav(d, i, j - 2, l, d[i][j][l] + 1)) {
                 visited[i][j - 2] = true;
                 tc.i = i;
@@ -193,7 +194,7 @@ void floodFill(vector<vector<int> >& b, vector<vector<vector<int> > >& d, vector
     }
     
     if(j < 4) {
-        if((b[i][j + 2] == empty) && ((b[i][j + 2] == rock) || (visited[i][j]))) { //right2
+        if((b[i][j + 2] == empty) && ((b[i][j + 2] == rock) || (visited_or[i][j+1]))) { //right2
             if(setav(d, i, j + 2, l, d[i][j][l] + 1)) {
                 visited[i][j + 2] = true;
                 tc.i = i;
@@ -202,6 +203,7 @@ void floodFill(vector<vector<int> >& b, vector<vector<vector<int> > >& d, vector
             }
         }
     }
+    
     int x, y, lev;
     if(Q.size()!=0){
     for(x = 0; x < 6; x++) {
