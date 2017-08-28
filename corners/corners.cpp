@@ -1,13 +1,11 @@
 //solves hellenico corners problem by modified flood fill
-//floods for each poul cyclically instead of assuming that 2 moves are always possible
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <vector>
-#include <iostream>
+//#include <iostream>
 #include <fstream>
-#include <algorithm>
+#include <vector>
+#include <utility>
 #include <queue>
+#include <algorithm>
 
 #define flag 2
 #define rock 1
@@ -15,215 +13,13 @@
 
 using namespace std;
 
-typedef struct {
-    int i, j;
-} coord;
 
-void flood(coord p, coord f, vector<vector<int> >& b, vector<vector<vector<int> > >& d, int l) { //position(to/current),from,board,distances,level
-    //check oob
-
-    if(p.i > 5) {
-        return;
-    }
-    if(p.j > 5) {
-        return;
-    }
-    if(p.i < 0) {
-        return;
-    }
-    if(p.j < 0) {
-        return;
-    }
-
-    if((p.i == f.i + 2) && (b[f.i + 1][f.j] == flag))
-        return;
-    if((p.i == f.i - 2) && (b[f.i - 1][f.j] == flag))
-        return;
-    if((p.j == f.j + 2) && (b[f.i][f.j + 1] == flag))
-        return;
-    if((p.j == f.j - 2) && (b[f.i][f.j - 1] == flag))
-        return;
-    //current cell is where im goin, neds to be empty
-    if(b[p.i][p.j] != 0) {
-        return;
-    }
-
-    //  ouf << f.i << "," << f.j << "(" << d[f.i][f.j][l] << ") -> " << p.i << ", " << p.j << "(" << d[p.i][p.j][l]<<endl;
-    if((d[f.i][f.j][l] + 1) < d[p.i][p.j][l]) {
-        d[p.i][p.j][l] = d[f.i][f.j][l] + 1;
-
-
-        coord n;//next
-        n.j = p.j;
-        n.i = p.i + 1;
-        flood(n, p, b, d, l);
-        n.i = p.i + 2;
-        flood(n, p, b, d, l);
-        n.i = p.i - 1;
-        flood(n, p, b, d, l);
-        n.i = p.i - 2;
-        flood(n, p, b, d, l);
-        n.i = p.i;
-        n.j = p.j + 1;
-        flood(n, p, b, d, l);
-        n.j = p.j + 2;
-        flood(n, p, b, d, l);
-        n.j = p.j - 1;
-        flood(n, p, b, d, l);
-        n.j = p.j - 2;
-        flood(n, p, b, d, l);
-    }
-
-}
-
-bool setav(vector<vector<vector<int> > >& d, int i, int j, int level, int amount) {
-    //checks if its ok to set a new dist to d[i][j][level] and does so
-
-    if(i > 5) {
-        return false;
-    }
-    if(j > 5) {
-        return false;
-    }
-    if(i < 0) {
-        return false;
-    }
-    if(j < 0) {
-        return false;
-    }
-    if(d[i][j][level] > amount) {
-        d[i][j][level] = amount;
-        return true;
-    }
-    return false;
-}
-
-void floodFill(vector<vector<int> >& b, vector<vector<vector<int> > >& d, vector<vector<bool> > visited_or, int i, int j, int l) { //position(to/current),from,board,distances,level
-    //check oob
-    if(i > 5) {
-        return;
-    }
-    if(j > 5) {
-        return;
-    }
-    if(i < 0) {
-        return;
-    }
-    if(j < 0) {
-        return;
-    }
-    
-    vector<vector<bool> > visited=visited_or;
-    queue<coord> Q;
-    coord tc;
-    if(i > 0) {
-        if(b[i - 1][j] == empty) { //up1
-            if(setav(d, i - 1, j, l, d[i][j][l] + 1)) {
-                visited[i - 1][j] = true;
-                tc.i = i - 1;
-                tc.j = j;
-                Q.push(tc);
-            }
-        }
-    }
-
-    if(i > 1) {
-        if((b[i - 2][j] == empty) && ((b[i - 1][j] == rock) || (visited_or[i-1][j]))) { //up2
-            if(setav(d, i - 2, j, l, d[i][j][l] + 1)) {
-                visited[i - 2][j] = true;
-                tc.i = i - 2;
-                tc.j = j;
-                Q.push(tc);
-            }
-        }
-    }
-
-    if(i < 5) {
-        if(b[i + 1][j] == empty) { //down1
-            if(setav(d, i + 1, j, l, d[i][j][l] + 1)) {
-                visited[i + 1][j] = true;
-                tc.i = i + 1;
-                tc.j = j;
-                Q.push(tc);
-            }
-        }
-    }
-
-    if(i < 4) {
-        if((b[i + 2][j] == empty) && ((b[i + 1][j] == rock) || (visited_or[i+1][j]))) { //down2
-            if(setav(d, i + 2, j, l, d[i][j][l] + 1)) {
-                visited[i + 2][j] = true;
-                tc.i = i + 2;
-                tc.j = j;
-                Q.push(tc);
-            }
-        }
-    }
-
-    if(j > 0) {
-        if(b[i][j - 1] == empty) { //left1
-            if(setav(d, i, j - 1, l, d[i][j][l] + 1)) {
-                visited[i][j - 1] = true;
-                tc.i = i;
-                tc.j = j - 1;
-                Q.push(tc);
-            }
-        }
-    }
-
-    if(j > 1) {
-        if((b[i][j - 2] == empty) && ((b[i][j - 2] == rock) || (visited_or[i][j-1]))) { //left2
-            if(setav(d, i, j - 2, l, d[i][j][l] + 1)) {
-                visited[i][j - 2] = true;
-                tc.i = i;
-                tc.j = j - 2;
-                Q.push(tc);
-            }
-        }
-    }
-
-    if(j < 5) {
-        if(b[i][j + 1] == empty) { //right1
-            if(setav(d, i, j + 1, l, d[i][j][l] + 1)) {
-                visited[i][j + 1] = true;
-                tc.i = i;
-                tc.j = j + 1;
-                Q.push(tc);
-            }
-        }
-    }
-    
-    if(j < 4) {
-        if((b[i][j + 2] == empty) && ((b[i][j + 2] == rock) || (visited_or[i][j+1]))) { //right2
-            if(setav(d, i, j + 2, l, d[i][j][l] + 1)) {
-                visited[i][j + 2] = true;
-                tc.i = i;
-                tc.j = j + 2;
-                Q.push(tc);
-            }
-        }
-    }
-    
-    int x, y, lev;
-    if(Q.size()!=0){
-    for(x = 0; x < 6; x++) {
-        for(y = 0; y < 6; y++) {
-            for(lev = 0; lev < 4; lev++) {
-                if(d[x][y][(l + 1) % 4] != 1337) {
-                    floodFill(b, d, visited, x, y, (l + 1) % 4);
-                }
-            }
-        }
-    }
-    
-    }
-}
 
 int main() {
     ifstream inf("corners.in");
     ofstream ouf("corners.out");
     int i, j, k, l;
-    int initval = 1337;
+    const int initval = 1337;
     char x;
     int times;
 
@@ -265,41 +61,123 @@ int main() {
         }
     }
 
-    dist[5][5][0] = 0;//init L1
-    dist[5][4][1] = 0;
-    dist[4][5][2] = 0;
-    dist[4][4][3] = 0;
-    visited[5][5] = true;
-    visited[5][4] = true;
-    visited[4][5] = true;
-    visited[4][4] = true;
+    dist[4][4][0]=0;
+    dist[4][5][1]=0;
+    dist[5][4][2]=0;
+    dist[5][5][3]=0;
+    const int maxdist = 4;
+    int currdist = 0;
+    int shitloadoftimes;
+    int asd;
+    for(asd=0;asd<100;asd++){
+    for(shitloadoftimes = 0; shitloadoftimes < 300; shitloadoftimes++) {
+        for(k = 0; k < 4; k++) {
+            for(i = 0; i < 6; i++) {
+                for(j = 0; j < 6; j++) {
+                    if(dist[i][j][k] == currdist) {
+                        if((j >= 1)   //                                  can i go left 1?
+                                && ((board[i][j - 1] == empty)) //              and nothing there
+                                && ((dist[i][j - 1][k] > currdist + 1))) { //  and not been there
+                            dist[i][j - 1][k] = currdist + 1;
+                            i--;
+                            break;
+                        }
 
-    floodFill(board, dist, visited, 4, 4, 3);
+                        if((j >= 2) &&  //                                can i go right 2?
+                                (board[i][j - 2] == empty) && //                and 2 sq up is empty
+                                (board[i][j - 1] != flag) && //                and no flag 1 sq up
+                                ((dist[i][j - 1][(k + 1) % 4] < currdist + 1 + maxdist) ||
+                                 (dist[i][j - 1][(k + 2) % 4] < currdist + 1 + maxdist) ||
+                                 (dist[i][j - 1][(k + 3) % 4] < currdist + 1 + maxdist)) &&
+                                (dist[i][j - 2][k] > currdist + 1)) { //       and not already visited
+                            dist[i][j - 2][k] = currdist + 1;
+                            i--;
+                            break;
+                        }
 
+                        if((j <= 4)   //                                  can i go left 1?
+                                && ((board[i][j + 1] == empty)) //              and nothing there
+                                && ((dist[i][j + 1][k] > currdist + 1))) { //  and not been there
+                            dist[i][j + 1][k] = currdist + 1;
+                            i--;
+                            break;
+                        }
 
-    vector<int> order;
-    order.push_back(0);
-    order.push_back(1);
-    order.push_back(2);
-    order.push_back(3);
+                        if((j <= 3) &&  //                                can i go right 2?
+                                (board[i][j + 2] == empty) && //                and 2 sq up is empty
+                                (board[i][j + 1] != flag) && //                and no flag 1 sq up
+                                ((dist[i][j + 1][(k + 1) % 4] < currdist + 1 + maxdist) ||
+                                 (dist[i][j + 1][(k + 3) % 4] < currdist + 1 + maxdist) ||
+                                 (dist[i][j + 1][(k + 2) % 4] < currdist + 1 + maxdist)) &&
+                                (dist[i][j + 2][k] > currdist + 1)) { //       and not already visited
+                            dist[i][j + 2][k] = currdist + 1;
+                            i--;
+                            break;
+                        }
 
-    int minsum = 5000;
-    int sum = 0;
-    coord c[4];
-    for(i = 0; i < 24; i++) {
-        sum = 0;
-        sum += dist[0][0][order[0]] - 1;
-        sum += dist[1][0][order[1]] - 1;
-        sum += dist[0][1][order[2]] - 1;
-        sum += dist[1][1][order[3]] - 1;
-        if(sum < minsum) {
-            minsum = sum;
+                        if((i >= 1)   //                                  can i go left 1?
+                                && ((board[i - 1][j] == empty)) //              and nothing there
+                                && ((dist[i - 1][j][k] > currdist + 1))) { //  and not been there
+                            dist[i - 1][j][k] = currdist + 1;
+                            i-=2;
+                            break;
+                        }
+
+                        if((i >= 2) &&  //                                can i go right 2?
+                                (board[i - 2][j] == empty) && //                and 2 sq up is empty
+                                (board[i - 1][j] != flag) && //                and no flag 1 sq up
+                                ((dist[i - 1][j][(k + 1) % 4] < currdist + 1 + maxdist) ||
+                                 (dist[i - 1][j][(k + 2) % 4] < currdist + 1 + maxdist) ||
+                                 (dist[i - 1][j][(k + 3) % 4] < currdist + 1 + maxdist)) &&
+                                (dist[i - 2][j][k] > currdist + 1)) { //       and not already visited
+                            dist[i - 2][j][k] = currdist + 1;
+                            i-=3;
+                            break;
+                        }
+
+                        if((i <= 4)   //                                  can i go left 1?
+                                && ((board[i + 1][j] == empty)) //              and nothing there
+                                && ((dist[i + 1][j][k] > currdist + 1))) { //  and not been there
+                            dist[i + 1][j][k] = currdist + 1;
+                            break;
+                        }
+
+                        if((i <= 3) &&  //                                can i go right 2?
+                                (board[i + 2][j] == empty) && //                and 2 sq up is empty
+                                (board[i + 1][j] != flag) && //                and no flag 1 sq up
+                                ((dist[i + 1][j][(k + 1) % 4] < currdist + 1 + maxdist) ||
+                                 (dist[i + 1][j][(k + 3) % 4] < currdist + 1 + maxdist) ||
+                                 (dist[i + 1][j][(k + 2) % 4] < currdist + 1 + maxdist)) &&
+                                (dist[i + 2][j][k] > currdist + 1)) { //       and not already visited
+                            dist[i + 2][j][k] = currdist + 1;
+                            i++;
+                            break;
+                        }
+                    }
+                }
+            }
         }
-        next_permutation(order.begin(), order.end());
+        currdist++;
+    }currdist=0;
     }
-    if(minsum > 199) {
-        minsum = -1;
-    }
-    ouf << minsum << endl;
+    
+    int tst[]={0,1,2,3};  
+    int sum=1243123;  
+    int sum1;  
+  
+    for (i=0; i<240; i++) { //brute force the minimum sum of the 4 down right squares  
+        sum1=dist[0][0][tst[0]]+dist[0][1][tst[1]]+dist[1][0][tst[2]]+dist[1][1][tst[3]];  
+        next_permutation(tst,tst+4);  
+        if (sum1<sum) {  
+            sum=sum1;  
+        }  
+    }  
+    //main idea is to calculate minimum distance from each point in 0,0 to 1,1 using dynamic programming(find min distance to known point and add to that to find min distance to e.g 0,0)  
+  
+    if (sum>100)  
+        sum=-1; 
+        
+    ouf<<sum<<endl;
     return 0;
+
 }
