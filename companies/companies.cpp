@@ -29,13 +29,12 @@ bool not_in(vector<node> w, int n){
 }
 
 int main(){
-
     freopen("companies.in", "r", stdin);
     freopen("companies.out", "w", stdout);
 
     vector<node> graph;
     edge edge_buffer;
-    vector<vector<int> > owns;//i owns j
+    vector<vector<int> > owns;//i owns j by value percent
     vector<vector<int> > temp_owns;//n by 2 table containing ownerships in current iteration
     vector<vector<int> > actual_owns;//n by 2 table containing all ownerships
     vector<int> actual_owns_buffer;
@@ -129,7 +128,7 @@ int main(){
                 sum = 0;
                 for (k = 0; k < graph[not_tree[j].n].edges.size(); k++){//for each edge leading to node not_tree[j]
                     for (l = 0; l < tree.size(); l++){//for all nodes in the tree
-                        if ((graph[not_tree[j].n].edges[k].from == tree[l].n) && (true/*tree[l].used*/)){//if this edge source is in tree and not flagged(at start all "used" flags are set to true)
+                        if (graph[not_tree[j].n].edges[k].from == tree[l].n){//if this edge source is in tree and not flagged(at start all "used" flags are set to true)
                             sum += graph[not_tree[j].n].edges[k].weight;
                         }
                         if (sum > 50){
