@@ -20,9 +20,9 @@ void initGraph(vector<node>& g, int N){
     }
 }
 
-bool isConnected(vector<node>& g, int N, vector<bool>& visited, int& nv, int j){
+bool isConnected(vector<node>& g, int N, vector<bool>& visited, uint32_t& nv, int j){
     //nv is num of visited nodes (instead of counting trues in visited)
-    int i;
+    uint32_t i;
     
     visited[j]=true;
     ++nv;
@@ -43,11 +43,15 @@ bool isConnected(vector<node>& g, int N, vector<bool>& visited, int& nv, int j){
 
 //TODO: find minimum spanning tree size function
 
+int getMinSpanningTreeLength(vector<node>& g,int N,vector<int> mst,vector<int> not_in_mst,int curr){
+
+}
+
 int main(){
-    vector<node> G;
+    vector<node> G,mst,notmst;
     vector<bool> V;//visited
-    int N,W;
-    int i,a,b,c;
+    uint32_t N,W;
+    uint32_t i,a,b,c;
     
     ifstream fin("maintain.in");
     ofstream fout("maintain.out");
@@ -68,7 +72,7 @@ int main(){
         G[b].weights.push_back(c); 
         a=0;
         if(isConnected(G,N,V,a,1)){
-            fout<<"n"<<endl;
+            fout<<getMinSpanningTreeLength(G,N,mst,notmst,0)<<endl;
         }else{
             fout<<"-1"<<endl;
         }
